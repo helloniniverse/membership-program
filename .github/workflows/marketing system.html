@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Program Financial Simulator</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f6f8;
+        color: #1f2937;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin: auto;
+        padding: 30px;
+    }
+
+    header {
+        background: #111827;
+        color: white;
+        border-radius: 18px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+    }
+
+    header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+    }
+
+    header p {
+        margin: 0;
+        color: #cbd5e1;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .tab {
+        border: 0;
+        padding: 12px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #e5e7eb;
+        font-weight: 700;
+    }
+
+    .tab.active {
+        background: #111827;
+        color: white;
+    }
+
+    .program {
+        display: none;
+    }
+
+    .program.active {
+        display: block;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 390px 1fr;
+        gap: 24px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        margin-bottom: 24px;
+    }
+
+    .card h2 {
+        margin-top: 0;
+        font-size: 19px;
+    }
+
+    .card h3 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #6b7280;
+        margin-top: 25px;
+    }
+
+    .field {
+        margin-bottom: 16px;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        color: #374151;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: #111827;
+    }
+
+    .days {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+    }
+
+    .day {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .day input {
+        margin: 0;
+    }
+
+    .switch-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        inset: 0;
+        background: #d1d5db;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .slider:before {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 3px;
+        top: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: .2s;
+    }
+
+    .switch input:checked + .slider {
+        background: #111827;
+    }
+
+    .switch input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .metric {
+        border: 1px solid #e5e7eb;
+        border-radius: 13px;
+        padding: 18px;
+        background: #fafafa;
+    }
+
+    .metric .label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+
+    .metric .value {
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .metric .sub {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .highlight {
+        background: #111827;
+        color: white;
+        border: none;
+    }
+
+    .highlight .label,
+    .highlight .sub {
+        color: #cbd5e1;
+    }
+
+    .positive {
+        color: #15803d;
+    }
+
+    .negative {
+        color: #b91c1c;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    th {
+        text-align: left;
+        padding: 12px;
+        background: #f3f4f6;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+    }
+
+    .scenario-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .scenario-btn {
+        border: 1px solid #d1d5db;
+        background: white;
+        padding: 9px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .scenario-btn.active {
+        background: #111827;
+        color: white;
+        border-color: #111827;
+    }
+
+    .formula {
+        background: #f3f4f6;
+        padding: 14px;
+        border-radius: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        margin-top: 15px;
+    }
+
+    .comparison {
+        margin-top: 25px;
+    }
+
+    .comparison td:nth-child(n+2),
+    .comparison th:nth-child(n+2) {
+        text-align: right;
+    }
+
+    .reset {
+        border: 0;
+        background: #e5e7eb;
+        padding: 10px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 700;
+        margin-top: 5px;
+    }
+
+    .info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    @media(max-width: 1000px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media(max-width: 600px) {
+        .container {
+            padding: 15px;
+        }
+
+        .results-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>VIP Program Financial Simulator</h1>
+    <p>Test membership pricing, reward utilization, customer value, company cost and required sales.</p>
+</header>
+
+<div class="tabs">
+    <button class="tab active" onclick="switchTab('boss', this)">
+        Boss Proposal
+    </button>
+
+    <button class="tab" onclick="switchTab('marketing', this)">
+        Marketing Proposal
+    </button>
+
+    <button class="tab" onclick="switchTab('comparison', this)">
+        Compare
+    </button>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- BOSS -->
+<!-- ========================================================= -->
+
+<div id="boss" class="program active">
+
+<div class="grid">
+
+<!-- INPUTS -->
+<div>
+
+<div class="card">
+
+<h2>Program Inputs</h2>
+
+<h3>Membership</h3>
+
+<div class="field">
+<label>Membership Price (₱)</label>
+<input type="number" id="bossMembership" value="5999" oninput="calculate('boss')">
+</div>
+
+<div class="field">
+<label>Duration (Months)</label>
+<input type="number" id="bossDuration" value="12" min="1" oninput="calculate('boss')">
+</div>
+
+
+<h3>Free Meal</h3>
+
+<div class="field">
+<label>Meal Name</label>
+<input type="text" id="bossMealName" value="₱199 Meal" oninput="calculate('boss')">
+</div>
+
+<div class="field">
+<label>Meal Selling Price (₱)</label>
+<input type="number" id="bossMealPrice" value="199" oninput="calculate('boss')">
+</div>
+
+<div class="field">
+<label>Meal Company Cost (₱)</label>
+<input type="number" id="bossMealCost" value="140.10" step="0.01" oninput="calculate('boss')">
+</div>
+
+<div class="field">
+<label>Maximum Redemptions Per Day</label>
+<input type="number" id="bossPerDay" value="1" min="1" oninput="calculate('boss')">
+</div>
+
+<label>Eligible Days</label>
+
+<div class="days">
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Monday" onchange="calculate('boss')">
+Monday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Tuesday" onchange="calculate('boss')">
+Tuesday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Wednesday" onchange="calculate('boss')">
+Wednesday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Thursday" onchange="calculate('boss')">
+Thursday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Friday" onchange="calculate('boss')">
+Friday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Saturday" checked onchange="calculate('boss')">
+Saturday
+</label>
+
+<label class="day">
+<input type="checkbox" class="boss-day" value="Sunday" checked onchange="calculate('boss')">
+Sunday
+</label>
+
+</div>
+
+
+<h3>Other Costs</h3>
+
+<div class="field">
+<label>VIP Card / Packaging Cost (₱)</label>
+<input type="number" id="bossCardCost" value="300" step="0.01" oninput="calculate('boss')">
+</div>
+
+<div class="field">
+<label>Other Program Cost (₱)</label>
+<input type="number" id="bossOtherCost" value="0" step="0.01" oninput="calculate('boss')">
+</div>
+
+
+<h3>Financial Assumption</h3>
+
+<div class="field">
+<label>Gross Margin (%)</label>
+<input type="number" id="bossMargin" value="50" min="0" max="100" step="0.1" oninput="calculate('boss')">
+</div>
+
+<button class="reset" onclick="resetProgram('boss')">
+Reset Boss Proposal
+</button>
+
+</div>
+
+</div>
+
+
+<!-- RESULTS -->
+
+<div>
+
+<div class="card">
+
+<h2>Live Financial Results</h2>
+
+<div class="results-grid">
+
+<div class="metric">
+<div class="label">Maximum Redemptions</div>
+<div class="value" id="bossMaxMeals">0</div>
+<div class="sub">meals during membership</div>
+</div>
+
+<div class="metric">
+<div class="label">Customer Value</div>
+<div class="value" id="bossCustomerValue">₱0</div>
+<div class="sub">maximum stated value</div>
+</div>
+
+<div class="metric">
+<div class="label">Membership Revenue</div>
+<div class="value" id="bossRevenue">₱0</div>
+<div class="sub">paid by customer</div>
+</div>
+
+<div class="metric">
+<div class="label">Maximum Company Cost</div>
+<div class="value" id="bossMaxCost">₱0</div>
+<div class="sub">100% utilization</div>
+</div>
+
+<div class="metric">
+<div class="label">Maximum Gap</div>
+<div class="value negative" id="bossGap">₱0</div>
+<div class="sub">cost minus membership revenue</div>
+</div>
+
+<div class="metric highlight">
+<div class="label">Required Additional Sales</div>
+<div class="value" id="bossRequiredSales">₱0</div>
+<div class="sub">annual sales at current gross margin</div>
+</div>
+
+</div>
+
+<div class="formula">
+Required Sales = Gap ÷ Gross Margin
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Sales Target Breakdown</h2>
+
+<div class="results-grid">
+
+<div class="metric">
+<div class="label">Annual</div>
+<div class="value" id="bossAnnualSales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Monthly</div>
+<div class="value" id="bossMonthlySales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Weekly</div>
+<div class="value" id="bossWeeklySales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Daily</div>
+<div class="value" id="bossDailySales">₱0</div>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Redemption Scenarios</h2>
+
+<div class="scenario-buttons">
+
+<button class="scenario-btn active" onclick="showScenario('boss',25,this)">
+25%
+</button>
+
+<button class="scenario-btn" onclick="showScenario('boss',50,this)">
+50%
+</button>
+
+<button class="scenario-btn" onclick="showScenario('boss',75,this)">
+75%
+</button>
+
+<button class="scenario-btn" onclick="showScenario('boss',100,this)">
+100%
+</button>
+
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+<tr>
+<th>Redemption</th>
+<th>Meals Used</th>
+<th>Meal Cost</th>
+<th>Card Cost</th>
+<th>Total Cost</th>
+<th>Membership</th>
+<th>Gap</th>
+<th>Required Sales</th>
+</tr>
+</thead>
+
+<tbody id="bossScenarioTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MARKETING -->
+<!-- ========================================================= -->
+
+<div id="marketing" class="program">
+
+<div class="grid">
+
+<div>
+
+<div class="card">
+
+<h2>Program Inputs</h2>
+
+<h3>Membership</h3>
+
+<div class="field">
+<label>Membership Price (₱)</label>
+<input type="number" id="marketingMembership" value="5999" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Duration (Months)</label>
+<input type="number" id="marketingDuration" value="12" min="1" oninput="calculate('marketing')">
+</div>
+
+
+<h3>Free Meal</h3>
+
+<div class="field">
+<label>Meal Name</label>
+<input type="text" value="₱199 Meal">
+</div>
+
+<div class="field">
+<label>Meal Selling Price (₱)</label>
+<input type="number" id="marketingMealPrice" value="199" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Meal Company Cost (₱)</label>
+<input type="number" id="marketingMealCost" value="140.10" step="0.01" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Maximum Redemptions Per Day</label>
+<input type="number" id="marketingPerDay" value="1" min="1" oninput="calculate('marketing')">
+</div>
+
+<label>Eligible Days</label>
+
+<div class="days">
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Monday" onchange="calculate('marketing')">
+Monday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Tuesday" onchange="calculate('marketing')">
+Tuesday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Wednesday" onchange="calculate('marketing')">
+Wednesday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Thursday" onchange="calculate('marketing')">
+Thursday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Friday" onchange="calculate('marketing')">
+Friday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Saturday" checked onchange="calculate('marketing')">
+Saturday
+</label>
+
+<label class="day">
+<input type="checkbox" class="marketing-day" value="Sunday" checked onchange="calculate('marketing')">
+Sunday
+</label>
+
+</div>
+
+
+<h3>Birthday Reward</h3>
+
+<div class="switch-row">
+
+<span>Enable Birthday Reward</span>
+
+<label class="switch">
+<input type="checkbox" id="marketingBirthdayEnabled" checked onchange="calculate('marketing')">
+<span class="slider"></span>
+</label>
+
+</div>
+
+<div class="field">
+<label>Birthday Selling Value (₱)</label>
+<input type="number" id="marketingBirthdayValue" value="229" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Birthday Company Cost (₱)</label>
+<input type="number" id="marketingBirthdayCost" value="186.52" step="0.01" oninput="calculate('marketing')">
+</div>
+
+
+<h3>Anniversary Reward</h3>
+
+<div class="switch-row">
+
+<span>Enable Anniversary Reward</span>
+
+<label class="switch">
+<input type="checkbox" id="marketingAnniversaryEnabled" checked onchange="calculate('marketing')">
+<span class="slider"></span>
+</label>
+
+</div>
+
+<div class="field">
+<label>Anniversary Selling Value (₱)</label>
+<input type="number" id="marketingAnniversaryValue" value="229" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Anniversary Company Cost (₱)</label>
+<input type="number" id="marketingAnniversaryCost" value="186.52" step="0.01" oninput="calculate('marketing')">
+</div>
+
+
+<h3>Other Costs</h3>
+
+<div class="field">
+<label>VIP Card / Packaging Cost (₱)</label>
+<input type="number" id="marketingCardCost" value="300" step="0.01" oninput="calculate('marketing')">
+</div>
+
+<div class="field">
+<label>Other Program Cost (₱)</label>
+<input type="number" id="marketingOtherCost" value="0" step="0.01" oninput="calculate('marketing')">
+</div>
+
+
+<h3>Financial Assumption</h3>
+
+<div class="field">
+<label>Gross Margin (%)</label>
+<input type="number" id="marketingMargin" value="50" min="0" max="100" step="0.1" oninput="calculate('marketing')">
+</div>
+
+<button class="reset" onclick="resetProgram('marketing')">
+Reset Marketing Proposal
+</button>
+
+</div>
+
+</div>
+
+
+<div>
+
+<div class="card">
+
+<h2>Live Financial Results</h2>
+
+<div class="results-grid">
+
+<div class="metric">
+<div class="label">Maximum Redemptions</div>
+<div class="value" id="marketingMaxMeals">0</div>
+<div class="sub">meals during membership</div>
+</div>
+
+<div class="metric">
+<div class="label">Customer Value</div>
+<div class="value" id="marketingCustomerValue">₱0</div>
+<div class="sub">maximum stated value</div>
+</div>
+
+<div class="metric">
+<div class="label">Membership Revenue</div>
+<div class="value" id="marketingRevenue">₱0</div>
+<div class="sub">paid by customer</div>
+</div>
+
+<div class="metric">
+<div class="label">Maximum Company Cost</div>
+<div class="value" id="marketingMaxCost">₱0</div>
+<div class="sub">100% utilization</div>
+</div>
+
+<div class="metric">
+<div class="label">Maximum Gap</div>
+<div class="value negative" id="marketingGap">₱0</div>
+<div class="sub">cost minus membership revenue</div>
+</div>
+
+<div class="metric highlight">
+<div class="label">Required Additional Sales</div>
+<div class="value" id="marketingRequiredSales">₱0</div>
+<div class="sub">annual sales at current gross margin</div>
+</div>
+
+</div>
+
+<div class="formula">
+Required Sales = Gap ÷ Gross Margin
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Sales Target Breakdown</h2>
+
+<div class="results-grid">
+
+<div class="metric">
+<div class="label">Annual</div>
+<div class="value" id="marketingAnnualSales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Monthly</div>
+<div class="value" id="marketingMonthlySales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Weekly</div>
+<div class="value" id="marketingWeeklySales">₱0</div>
+</div>
+
+<div class="metric">
+<div class="label">Daily</div>
+<div class="value" id="marketingDailySales">₱0</div>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Redemption Scenarios</h2>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+<tr>
+<th>Redemption</th>
+<th>Meals Used</th>
+<th>Meal Cost</th>
+<th>Other Rewards</th>
+<th>Card</th>
+<th>Total Cost</th>
+<th>Gap</th>
+<th>Required Sales</th>
+</tr>
+</thead>
+
+<tbody id="marketingScenarioTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- COMPARISON -->
+<!-- ========================================================= -->
+
+<div id="comparison" class="program">
+
+<div class="card">
+
+<h2>Boss vs Marketing Proposal</h2>
+
+<div class="info">
+This comparison uses the current inputs from both proposals.
+Change the assumptions in either proposal and this table updates automatically.
+</div>
+
+<div class="table-wrapper comparison">
+
+<table>
+
+<thead>
+<tr>
+<th>Metric</th>
+<th>Boss Proposal</th>
+<th>Marketing Proposal</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Membership Price</td>
+<td id="compareMembershipBoss"></td>
+<td id="compareMembershipMarketing"></td>
+</tr>
+
+<tr>
+<td>Duration</td>
+<td id="compareDurationBoss"></td>
+<td id="compareDurationMarketing"></td>
+</tr>
+
+<tr>
+<td>Free Meal Redemptions</td>
+<td id="compareMealsBoss"></td>
+<td id="compareMealsMarketing"></td>
+</tr>
+
+<tr>
+<td>Customer Value</td>
+<td id="compareValueBoss"></td>
+<td id="compareValueMarketing"></td>
+</tr>
+
+<tr>
+<td>Maximum Company Cost</td>
+<td id="compareCostBoss"></td>
+<td id="compareCostMarketing"></td>
+</tr>
+
+<tr>
+<td>Membership Revenue</td>
+<td id="compareRevenueBoss"></td>
+<td id="compareRevenueMarketing"></td>
+</tr>
+
+<tr>
+<td>Maximum Gap</td>
+<td id="compareGapBoss"></td>
+<td id="compareGapMarketing"></td>
+</tr>
+
+<tr>
+<td>Required Additional Sales</td>
+<td id="compareSalesBoss"></td>
+<td id="compareSalesMarketing"></td>
+</tr>
+
+<tr>
+<td>Value / Price</td>
+<td id="compareRatioBoss"></td>
+<td id="compareRatioMarketing"></td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Business Interpretation</h2>
+
+<div class="results-grid">
+
+<div class="metric">
+<div class="label">Higher Customer Value</div>
+<div class="value" id="higherValue"></div>
+<div class="sub">based on maximum stated reward value</div>
+</div>
+
+<div class="metric">
+<div class="label">Lower Maximum Cost</div>
+<div class="value" id="lowerCost"></div>
+<div class="sub">lower financial exposure</div>
+</div>
+
+<div class="metric">
+<div class="label">Lower Sales Requirement</div>
+<div class="value" id="lowerSales"></div>
+<div class="sub">easier to recover reward cost</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const scenarios = [25, 50, 75, 100];
+
+let currentData = {
+    boss: {},
+    marketing: {}
+};
+
+
+function money(value) {
+
+    return new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+        maximumFractionDigits: 2
+    }).format(value || 0);
+
+}
+
+
+function number(value) {
+
+    return new Intl.NumberFormat('en-PH', {
+        maximumFractionDigits: 0
+    }).format(value || 0);
+
+}
+
+
+function get(id) {
+    return parseFloat(document.getElementById(id).value) || 0;
+}
+
+
+function checkedDays(type) {
+
+    return document.querySelectorAll('.' + type + '-day:checked').length;
+
+}
+
+
+function calculate(type) {
+
+    let prefix = type === 'boss' ? 'boss' : 'marketing';
+
+    const membership = get(prefix + 'Membership');
+
+    const duration = get(prefix + 'Duration');
+
+    const mealPrice = get(prefix + 'MealPrice');
+
+    const mealCost = get(prefix + 'MealCost');
+
+    const perDay = get(prefix + 'PerDay');
+
+    const eligibleDays = checkedDays(type);
+
+    /*
+        We use 52 weeks per 12 months.
+
+        Example:
+        12 months = 52 weeks
+        6 months = 26 weeks
+        18 months = 78 weeks
+    */
+
+    const weeks = duration * (52 / 12);
+
+    /*
+        Maximum weekly redemptions:
+
+        Eligible days × maximum redemption per day
+    */
+
+    const weeklyRedemptions = eligibleDays * perDay;
+
+    const maxMeals = Math.floor(weeklyRedemptions * weeks);
+
+    const mealCustomerValue = maxMeals * mealPrice;
+
+    let otherCustomerValue = 0;
+
+    let otherCost = 0;
+
+
+    if (type === 'marketing') {
+
+        const birthdayEnabled =
+            document.getElementById('marketingBirthdayEnabled').checked;
+
+        const anniversaryEnabled =
+            document.getElementById('marketingAnniversaryEnabled').checked;
+
+
+        if (birthdayEnabled) {
+
+            otherCustomerValue += get('marketingBirthdayValue');
+
+            otherCost += get('marketingBirthdayCost');
+
+        }
+
+
+        if (anniversaryEnabled) {
+
+            otherCustomerValue += get('marketingAnniversaryValue');
+
+            otherCost += get('marketingAnniversaryCost');
+
+        }
+
+    }
+
+
+    const customerValue =
+        mealCustomerValue + otherCustomerValue;
+
+
+    const cardCost = get(prefix + 'CardCost');
+
+    const programOtherCost = get(prefix + 'OtherCost');
+
+    /*
+        Maximum company cost
+    */
+
+    const mealCostTotal =
+        maxMeals * mealCost;
+
+    const maxCost =
+        mealCostTotal +
+        otherCost +
+        cardCost +
+        programOtherCost;
+
+
+    /*
+        Gap:
+        Company cost - membership revenue
+    */
+
+    const gap = Math.max(0, maxCost - membership);
+
+
+    const margin = get(prefix + 'Margin') / 100;
+
+
+    /*
+        Required additional sales.
+
+        Example:
+        Gap = ₱8,871.40
+        Gross Margin = 50%
+
+        Required Sales =
+        8,871.40 / 0.50
+        = ₱17,742.80
+    */
+
+    const requiredSales =
+        margin > 0 ? gap / margin : 0;
+
+
+    const monthlySales =
+        duration > 0 ? requiredSales / duration : 0;
+
+    const weeklySales =
+        weeks > 0 ? requiredSales / weeks : 0;
+
+    const dailySales =
+        weeks > 0 ? requiredSales / (weeks * 7) : 0;
+
+
+    const valueRatio =
+        membership > 0 ? customerValue / membership : 0;
+
+
+    currentData[type] = {
+
+        membership,
+        duration,
+        weeks,
+        eligibleDays,
+        weeklyRedemptions,
+        maxMeals,
+        mealPrice,
+        mealCost,
+        mealCostTotal,
+        otherCustomerValue,
+        otherCost,
+        cardCost,
+        programOtherCost,
+        customerValue,
+        maxCost,
+        gap,
+        margin,
+        requiredSales,
+        monthlySales,
+        weeklySales,
+        dailySales,
+        valueRatio
+
+    };
+
+
+    /*
+        Update dashboard
+    */
+
+    document.getElementById(prefix + 'MaxMeals').textContent =
+        number(maxMeals);
+
+    document.getElementById(prefix + 'CustomerValue').textContent =
+        money(customerValue);
+
+    document.getElementById(prefix + 'Revenue').textContent =
+        money(membership);
+
+    document.getElementById(prefix + 'MaxCost').textContent =
+        money(maxCost);
+
+    const gapElement =
+        document.getElementById(prefix + 'Gap');
+
+    if (maxCost <= membership) {
+
+        gapElement.textContent =
+            '+' + money(membership - maxCost);
+
+        gapElement.className =
+            'value positive';
+
+    } else {
+
+        gapElement.textContent =
+            '-' + money(gap);
+
+        gapElement.className =
+            'value negative';
+
+    }
+
+
+    document.getElementById(prefix + 'RequiredSales').textContent =
+        money(requiredSales);
+
+    document.getElementById(prefix + 'AnnualSales').textContent =
+        money(requiredSales);
+
+    document.getElementById(prefix + 'MonthlySales').textContent =
+        money(monthlySales);
+
+    document.getElementById(prefix + 'WeeklySales').textContent =
+        money(weeklySales);
+
+    document.getElementById(prefix + 'DailySales').textContent =
+        money(dailySales);
+
+
+    buildScenarioTable(type);
+
+    updateComparison();
+
+}
+
+
+function buildScenarioTable(type) {
+
+    const data = currentData[type];
+
+    const tbody =
+        document.getElementById(type + 'ScenarioTable');
+
+    tbody.innerHTML = '';
+
+
+    scenarios.forEach(percent => {
+
+        const meals =
+            Math.floor(data.maxMeals * percent / 100);
+
+
+        const mealCost =
+            meals * data.mealCost;
+
+
+        const totalCost =
+            mealCost +
+            data.otherCost +
+            data.cardCost +
+            data.programOtherCost;
+
+
+        const gap =
+            Math.max(0, totalCost - data.membership);
+
+
+        const surplus =
+            Math.max(0, data.membership - totalCost);
+
+
+        const requiredSales =
+            data.margin > 0
+                ? gap / data.margin
+                : 0;
+
+
+        const row =
+            document.createElement('tr');
+
+
+        if (type === 'boss') {
+
+            row.innerHTML = `
+
+                <td><strong>${percent}%</strong></td>
+
+                <td>${number(meals)}</td>
+
+                <td>${money(mealCost)}</td>
+
+                <td>${money(data.cardCost)}</td>
+
+                <td>${money(totalCost)}</td>
+
+                <td>${money(data.membership)}</td>
+
+                <td class="${gap > 0 ? 'negative' : 'positive'}">
+                    ${gap > 0 ? '-' + money(gap) : '+' + money(surplus)}
+                </td>
+
+                <td>
+                    ${requiredSales > 0
+                        ? money(requiredSales)
+                        : '₱0'}
+                </td>
+
+            `;
+
+        } else {
+
+            row.innerHTML = `
+
+                <td><strong>${percent}%</strong></td>
+
+                <td>${number(meals)}</td>
+
+                <td>${money(mealCost)}</td>
+
+                <td>${money(data.otherCost)}</td>
+
+                <td>${money(data.cardCost)}</td>
+
+                <td>${money(totalCost)}</td>
+
+                <td class="${gap > 0 ? 'negative' : 'positive'}">
+                    ${gap > 0 ? '-' + money(gap) : '+' + money(surplus)}
+                </td>
+
+                <td>
+                    ${requiredSales > 0
+                        ? money(requiredSales)
+                        : '₱0'}
+                </td>
+
+            `;
+
+        }
+
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+function updateComparison() {
+
+    const boss = currentData.boss;
+
+    const marketing = currentData.marketing;
+
+
+    if (!boss.membership || !marketing.membership) {
+        return;
+    }
+
+
+    document.getElementById('compareMembershipBoss').textContent =
+        money(boss.membership);
+
+    document.getElementById('compareMembershipMarketing').textContent =
+        money(marketing.membership);
+
+
+    document.getElementById('compareDurationBoss').textContent =
+        boss.duration + ' months';
+
+    document.getElementById('compareDurationMarketing').textContent =
+        marketing.duration + ' months';
+
+
+    document.getElementById('compareMealsBoss').textContent =
+        number(boss.maxMeals);
+
+    document.getElementById('compareMealsMarketing').textContent =
+        number(marketing.maxMeals);
+
+
+    document.getElementById('compareValueBoss').textContent =
+        money(boss.customerValue);
+
+    document.getElementById('compareValueMarketing').textContent =
+        money(marketing.customerValue);
+
+
+    document.getElementById('compareCostBoss').textContent =
+        money(boss.maxCost);
+
+    document.getElementById('compareCostMarketing').textContent =
+        money(marketing.maxCost);
+
+
+    document.getElementById('compareRevenueBoss').textContent =
+        money(boss.membership);
+
+    document.getElementById('compareRevenueMarketing').textContent =
+        money(marketing.membership);
+
+
+    document.getElementById('compareGapBoss').textContent =
+        boss.gap > 0
+            ? '-' + money(boss.gap)
+            : '+' + money(boss.membership - boss.maxCost);
+
+    document.getElementById('compareGapMarketing').textContent =
+        marketing.gap > 0
+            ? '-' + money(marketing.gap)
+            : '+' + money(marketing.membership - marketing.maxCost);
+
+
+    document.getElementById('compareSalesBoss').textContent =
+        money(boss.requiredSales);
+
+    document.getElementById('compareSalesMarketing').textContent =
+        money(marketing.requiredSales);
+
+
+    document.getElementById('compareRatioBoss').textContent =
+        boss.valueRatio.toFixed(2) + '×';
+
+    document.getElementById('compareRatioMarketing').textContent =
+        marketing.valueRatio.toFixed(2) + '×';
+
+
+    document.getElementById('higherValue').textContent =
+        boss.customerValue > marketing.customerValue
+            ? 'Boss'
+            : marketing.customerValue > boss.customerValue
+                ? 'Marketing'
+                : 'Equal';
+
+
+    document.getElementById('lowerCost').textContent =
+        boss.maxCost < marketing.maxCost
+            ? 'Boss'
+            : marketing.maxCost < boss.maxCost
+                ? 'Marketing'
+                : 'Equal';
+
+
+    document.getElementById('lowerSales').textContent =
+        boss.requiredSales < marketing.requiredSales
+            ? 'Boss'
+            : marketing.requiredSales < boss.requiredSales
+                ? 'Marketing'
+                : 'Equal';
+
+}
+
+
+function switchTab(tab, button) {
+
+    document.querySelectorAll('.program')
+        .forEach(el => el.classList.remove('active'));
+
+    document.getElementById(tab)
+        .classList.add('active');
+
+
+    document.querySelectorAll('.tab')
+        .forEach(el => el.classList.remove('active'));
+
+    button.classList.add('active');
+
+}
+
+
+function showScenario(type, percentage, button) {
+
+    button.parentElement
+        .querySelectorAll('.scenario-btn')
+        .forEach(btn => btn.classList.remove('active'));
+
+    button.classList.add('active');
+
+}
+
+
+function resetProgram(type) {
+
+    if (type === 'boss') {
+
+        document.getElementById('bossMembership').value = 5999;
+        document.getElementById('bossDuration').value = 12;
+        document.getElementById('bossMealPrice').value = 199;
+        document.getElementById('bossMealCost').value = 140.10;
+        document.getElementById('bossPerDay').value = 1;
+        document.getElementById('bossCardCost').value = 300;
+        document.getElementById('bossOtherCost').value = 0;
+        document.getElementById('bossMargin').value = 50;
+
+        document.querySelectorAll('.boss-day')
+            .forEach(el => el.checked = false);
+
+        document.querySelectorAll('.boss-day')
+            .forEach(el => {
+
+                if (
+                    el.value === 'Saturday' ||
+                    el.value === 'Sunday'
+                ) {
+                    el.checked = true;
+                }
+
+            });
+
+    }
+
+
+    if (type === 'marketing') {
+
+        document.getElementById('marketingMembership').value = 5999;
+        document.getElementById('marketingDuration').value = 12;
+        document.getElementById('marketingMealPrice').value = 199;
+        document.getElementById('marketingMealCost').value = 140.10;
+        document.getElementById('marketingPerDay').value = 1;
+
+        document.getElementById('marketingBirthdayEnabled').checked = true;
+        document.getElementById('marketingBirthdayValue').value = 229;
+        document.getElementById('marketingBirthdayCost').value = 186.52;
+
+        document.getElementById('marketingAnniversaryEnabled').checked = true;
+        document.getElementById('marketingAnniversaryValue').value = 229;
+        document.getElementById('marketingAnniversaryCost').value = 186.52;
+
+        document.getElementById('marketingCardCost').value = 300;
+        document.getElementById('marketingOtherCost').value = 0;
+        document.getElementById('marketingMargin').value = 50;
+
+        document.querySelectorAll('.marketing-day')
+            .forEach(el => el.checked = false);
+
+        document.querySelectorAll('.marketing-day')
+            .forEach(el => {
+
+                if (
+                    el.value === 'Saturday' ||
+                    el.value === 'Sunday'
+                ) {
+                    el.checked = true;
+                }
+
+            });
+
+    }
+
+
+    calculate(type);
+
+}
+
+
+/*
+    Initial calculation
+*/
+
+calculate('boss');
+calculate('marketing');
+
+</script>
+
+</body>
+</html>
