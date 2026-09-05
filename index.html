@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harrison VIP Program Simulator</title>
+
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>Harrison VIP Program Simulator</h1>
+  <p>Live simulator for membership cost, customer value, redemption risk, required sales, House Points, PCQP and renewal.</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('boss',this)">Boss Proposal</button>
+  <button class="tab" onclick="switchTab('marketing',this)">Marketing Proposal</button>
+  <button class="tab" onclick="switchTab('loyalty',this)">HP • PCQP • Renewal</button>
+  <button class="tab" onclick="switchTab('comparison',this)">Compare</button>
+</div>
+
+<!-- BOSS -->
+<div id="boss" class="program active">
+<div class="grid">
+<div>
+<div class="card">
+<h2>Boss Proposal Inputs</h2>
+<h3>Membership</h3>
+<div class="two">
+<div class="field"><label>Membership Price (₱)</label><input id="bossMembership" type="number" value="5999" oninput="calculate('boss')"></div>
+<div class="field"><label>Duration (Months)</label><input id="bossDuration" type="number" value="12" min="1" oninput="calculate('boss')"></div>
+</div>
+
+<h3>Free Meal</h3>
+<div class="field"><label>Meal Name</label><input id="bossMealName" type="text" value="₱199 Meal" oninput="calculate('boss')"></div>
+<div class="two">
+<div class="field"><label>Selling Price (₱)</label><input id="bossMealPrice" type="number" value="199" oninput="calculate('boss')"></div>
+<div class="field"><label>Company Cost (₱)</label><input id="bossMealCost" type="number" value="140.10" step=".01" oninput="calculate('boss')"></div>
+</div>
+<div class="field"><label>Redemptions Per Eligible Day</label><input id="bossPerDay" type="number" value="1" min="1" max="1" step="1" readonly></div>
+
+<h3>Eligibility</h3>
+<div class="field"><label>Choose eligible days</label><div class="days" id="bossDays"></div><div class="help">For Boss: every selected eligible day may be redeemed, with a maximum of 1 redemption per eligible day.</div></div>
+<div class="choice">
+<label><input type="radio" name="bossTimeMode" value="any" checked onchange="calculate('boss')"> Any time</label>
+<label><input type="radio" name="bossTimeMode" value="span" onchange="calculate('boss')"> Specific time span</label>
+</div>
+<div id="bossTimeFields" class="two" style="display:none;margin-top:9px">
+<div class="field"><label>From</label><input id="bossTimeFrom" type="time" value="11:00" onchange="calculate('boss')"></div>
+<div class="field"><label>To</label><input id="bossTimeTo" type="time" value="21:00" onchange="calculate('boss')"></div>
+</div>
+
+<h3>Costs & Financial Assumption</h3>
+<div class="two">
+<div class="field"><label>VIP Card / Packaging Cost (₱)</label><input id="bossCardCost" type="number" value="300" step=".01" oninput="calculate('boss')"></div>
+<div class="field"><label>Other Program Cost (₱)</label><input id="bossOtherCost" type="number" value="0" step=".01" oninput="calculate('boss')"></div>
+</div>
+<div class="two">
+<div class="field"><label>Conservative Maximum Cost (%)</label><input id="bossMaxCostRate" type="number" value="87.04" readonly></div>
+<div class="field"><label>Conservative GP (%)</label><input id="bossGpRate" type="number" value="12.96" readonly></div>
+</div>
+<div class="help">Fixed planning formula: Maximum Planning Cost = Sales × 87.04%. Conservative GP = Sales × 12.96%.</div>
+<button class="btn secondary" onclick="resetProgram('boss')">Reset Boss</button>
+</div>
+</div>
+
+<div>
+<div class="card"><h2>Live Financial Results</h2><div class="results-grid">
+<div class="metric"><div class="label">Maximum Redemptions</div><div class="value" id="bossMaxMeals">0</div><div class="sub">over membership</div></div>
+<div class="metric"><div class="label">Customer Value</div><div class="value" id="bossCustomerValue">₱0</div><div class="sub">maximum stated value</div></div>
+<div class="metric"><div class="label">Membership Revenue</div><div class="value" id="bossRevenue">₱0</div><div class="sub">paid by customer</div></div>
+<div class="metric"><div class="label">Maximum Company Cost</div><div class="value" id="bossMaxCost">₱0</div><div class="sub">100% utilization</div></div>
+<div class="metric"><div class="label">Maximum Gap</div><div class="value negative" id="bossGap">₱0</div><div class="sub">cost less membership revenue</div></div>
+<div class="metric highlight"><div class="label">Required Additional Sales</div><div class="value" id="bossRequiredSales">₱0</div><div class="sub">gap ÷ 12.96% conservative GP</div></div>
+<div class="metric"><div class="label">Membership Contribution</div><div class="value" id="bossMembershipContribution">₱0</div><div class="sub">membership fee − base privilege cost</div></div>
+<div class="metric"><div class="label">Conservative GP at Target</div><div class="value" id="bossTargetGP">₱0</div><div class="sub">required sales × 12.96%</div></div>
+<div class="metric highlight"><div class="label">1st-Year Direct Contribution</div><div class="value" id="bossFirstYearContribution">₱0</div><div class="sub">fee + food GP − base privilege cost</div></div>
+</div><div class="formula"><b>Core formulas:</b> Food Sales = actual transaction selling price. Product Cost = actual cost of products sold. GP = Sales − Product Cost. Maximum Planning Cost = Sales × 87.04%. Conservative GP = Sales × 12.96%. Required Sales = Gap ÷ 12.96%. Membership Contribution = Membership Fee − Actual Base Privilege Cost. Total First-Year Direct Contribution = Membership Fee + Food GP − Base Privilege Cost.</div></div>
+
+<div class="card"><h2>Sales Target Breakdown</h2><div class="results-grid">
+<div class="metric"><div class="label">Annual</div><div class="value" id="bossAnnualSales">₱0</div></div>
+<div class="metric"><div class="label">Monthly</div><div class="value" id="bossMonthlySales">₱0</div></div>
+<div class="metric"><div class="label">Weekly</div><div class="value" id="bossWeeklySales">₱0</div></div>
+<div class="metric"><div class="label">Daily</div><div class="value" id="bossDailySales">₱0</div></div>
+</div></div>
+
+<div class="card"><div class="section-title"><h2>Redemption Scenarios</h2><div class="scenario-count"><span class="note">Number of scenarios</span><input id="bossScenarioCount" type="number" min="1" max="12" value="4" onchange="renderScenarioInputs('boss')"><button class="btn secondary" onclick="renderScenarioInputs('boss')">Apply</button></div></div>
+<div id="bossScenarioInputs" style="margin:12px 0"></div>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Redemption</th><th>Meals Used</th><th>Meal Cost</th><th>Other Cost</th><th>Total Cost</th><th>Gap / Surplus</th><th>Required Sales</th><th>Conservative GP</th><th>1st-Year Direct Contribution</th></tr></thead><tbody id="bossScenarioTable"></tbody></table></div></div>
+</div></div></div>
+
+<!-- MARKETING -->
+<div id="marketing" class="program">
+<div class="grid">
+<div>
+<div class="card">
+<h2>Marketing Proposal Inputs</h2>
+<h3>Membership</h3>
+<div class="two">
+<div class="field"><label>Membership Price (₱)</label><input id="marketingMembership" type="number" value="5999" oninput="calculate('marketing')"></div>
+<div class="field"><label>Duration (Months)</label><input id="marketingDuration" type="number" value="12" min="1" oninput="calculate('marketing')"></div>
+</div>
+
+<h3>Free Meal</h3>
+<div class="field"><label>Meal Name</label><input id="marketingMealName" type="text" value="₱199 Meal" oninput="calculate('marketing')"></div>
+<div class="two">
+<div class="field"><label>Selling Price (₱)</label><input id="marketingMealPrice" type="number" value="199" oninput="calculate('marketing')"></div>
+<div class="field"><label>Company Cost (₱)</label><input id="marketingMealCost" type="number" value="140.10" step=".01" oninput="calculate('marketing')"></div>
+</div>
+<div class="field"><label>Redemptions Per Eligible Day</label><input id="marketingPerDay" type="number" value="1" min="1" max="1" step="1" readonly></div>
+
+<h3>Marketing Day Rule</h3>
+<div class="field"><label>Choose the 2 eligible days</label><div class="days" id="marketingDays"></div><div class="help">Marketing logic: when two days are selected, the customer may redeem on <b>either one</b> of those days for that week — not both. This models “Saturday OR Sunday”.</div></div>
+<div class="field"><label>Day Rule</label><select id="marketingDayRule" onchange="calculate('marketing')"><option value="either">Either selected day — 1 redemption per week</option></select></div>
+
+<h3>Time Rule</h3>
+<div class="choice">
+<label><input type="radio" name="marketingTimeMode" value="any" checked onchange="toggleTime('marketing');calculate('marketing')"> Any time</label>
+<label><input type="radio" name="marketingTimeMode" value="two" onchange="toggleTime('marketing');calculate('marketing')"> Two time spans</label>
+</div>
+<div id="marketingTimeFields" style="display:none;margin-top:9px">
+<div class="two">
+<div class="field"><label>Time Span 1 — From</label><input id="marketingTime1From" type="time" value="11:00" onchange="calculate('marketing')"></div>
+<div class="field"><label>Time Span 1 — To</label><input id="marketingTime1To" type="time" value="14:00" onchange="calculate('marketing')"></div>
+<div class="field"><label>Time Span 2 — From</label><input id="marketingTime2From" type="time" value="17:00" onchange="calculate('marketing')"></div>
+<div class="field"><label>Time Span 2 — To</label><input id="marketingTime2To" type="time" value="21:00" onchange="calculate('marketing')"></div>
+</div>
+</div>
+
+<h3>Birthday Reward</h3>
+<div class="switchrow"><span>Enable Birthday Reward</span><label class="switch"><input id="marketingBirthdayEnabled" type="checkbox" checked onchange="calculate('marketing')"><span class="slider"></span></label></div>
+<div class="two">
+<div class="field"><label>Selling Value (₱)</label><input id="marketingBirthdayValue" type="number" value="229" oninput="calculate('marketing')"></div>
+<div class="field"><label>Company Cost (₱)</label><input id="marketingBirthdayCost" type="number" value="186.52" step=".01" oninput="calculate('marketing')"></div>
+</div>
+
+<h3>Anniversary Reward</h3>
+<div class="switchrow"><span>Enable Anniversary Reward</span><label class="switch"><input id="marketingAnniversaryEnabled" type="checkbox" checked onchange="calculate('marketing')"><span class="slider"></span></label></div>
+<div class="two">
+<div class="field"><label>Selling Value (₱)</label><input id="marketingAnniversaryValue" type="number" value="229" oninput="calculate('marketing')"></div>
+<div class="field"><label>Company Cost (₱)</label><input id="marketingAnniversaryCost" type="number" value="186.52" step=".01" oninput="calculate('marketing')"></div>
+</div>
+
+<h3>Costs & Financial Assumption</h3>
+<div class="two">
+<div class="field"><label>VIP Card / Packaging Cost (₱)</label><input id="marketingCardCost" type="number" value="300" step=".01" oninput="calculate('marketing')"></div>
+<div class="field"><label>Other Program Cost (₱)</label><input id="marketingOtherCost" type="number" value="0" step=".01" oninput="calculate('marketing')"></div>
+</div>
+<div class="two">
+<div class="field"><label>Conservative Maximum Cost (%)</label><input id="marketingMaxCostRate" type="number" value="87.04" readonly></div>
+<div class="field"><label>Conservative GP (%)</label><input id="marketingGpRate" type="number" value="12.96" readonly></div>
+</div>
+<div class="help">Fixed planning formula: Maximum Planning Cost = Sales × 87.04%. Conservative GP = Sales × 12.96%.</div>
+<button class="btn secondary" onclick="resetProgram('marketing')">Reset Marketing</button>
+</div>
+</div>
+
+<div>
+<div class="card"><h2>Live Financial Results</h2><div class="results-grid">
+<div class="metric"><div class="label">Maximum Redemptions</div><div class="value" id="marketingMaxMeals">0</div><div class="sub">meal rewards only</div></div>
+<div class="metric"><div class="label">Customer Value</div><div class="value" id="marketingCustomerValue">₱0</div><div class="sub">meal + other reward value</div></div>
+<div class="metric"><div class="label">Membership Revenue</div><div class="value" id="marketingRevenue">₱0</div><div class="sub">paid by customer</div></div>
+<div class="metric"><div class="label">Maximum Company Cost</div><div class="value" id="marketingMaxCost">₱0</div><div class="sub">100% meal utilization + enabled rewards</div></div>
+<div class="metric"><div class="label">Maximum Gap</div><div class="value negative" id="marketingGap">₱0</div><div class="sub">cost less membership revenue</div></div>
+<div class="metric highlight"><div class="label">Required Additional Sales</div><div class="value" id="marketingRequiredSales">₱0</div><div class="sub">gap ÷ 12.96% conservative GP</div></div>
+<div class="metric"><div class="label">Membership Contribution</div><div class="value" id="marketingMembershipContribution">₱0</div><div class="sub">membership fee − base privilege cost</div></div>
+<div class="metric"><div class="label">Conservative GP at Target</div><div class="value" id="marketingTargetGP">₱0</div><div class="sub">required sales × 12.96%</div></div>
+<div class="metric highlight"><div class="label">1st-Year Direct Contribution</div><div class="value" id="marketingFirstYearContribution">₱0</div><div class="sub">fee + food GP − base privilege cost</div></div>
+</div><div class="formula">Marketing day logic is configurable: “Either selected day” = 1 meal/week; “Both selected days” = 2 meals/week. Time can be Any Time or two defined time spans. Financial planning uses the fixed 87.04% maximum-cost / 12.96% conservative-GP formulas.</div></div>
+
+<div class="card"><h2>Sales Target Breakdown</h2><div class="results-grid">
+<div class="metric"><div class="label">Annual</div><div class="value" id="marketingAnnualSales">₱0</div></div>
+<div class="metric"><div class="label">Monthly</div><div class="value" id="marketingMonthlySales">₱0</div></div>
+<div class="metric"><div class="label">Weekly</div><div class="value" id="marketingWeeklySales">₱0</div></div>
+<div class="metric"><div class="label">Daily</div><div class="value" id="marketingDailySales">₱0</div></div>
+</div></div>
+
+<div class="card"><div class="section-title"><h2>Redemption Scenarios</h2><div class="scenario-count"><span class="note">Number of scenarios</span><input id="marketingScenarioCount" type="number" min="1" max="12" value="4" onchange="renderScenarioInputs('marketing')"><button class="btn secondary" onclick="renderScenarioInputs('marketing')">Apply</button></div></div>
+<div id="marketingScenarioInputs" style="margin:12px 0"></div>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Redemption</th><th>Meals Used</th><th>Meal Cost</th><th>Other Rewards Cost</th><th>Card</th><th>Total Cost</th><th>Gap / Surplus</th><th>Required Sales</th><th>Conservative GP</th><th>1st-Year Direct Contribution</th></tr></thead><tbody id="marketingScenarioTable"></tbody></table></div></div>
+</div></div></div>
+
+<!-- LOYALTY -->
+<div id="loyalty" class="program">
+<div class="grid">
+<div>
+<div class="card">
+<h2>House Points + PCQP</h2>
+<div class="info">Everything in this section is connected. Paid customer sales drive the annual sales estimate, House Points and conservative GP. PCQP is then calculated from conservative GP. The same annualized spend is used for the renewal check and renewal discount.</div>
+
+<h3>1. House Points Formula</h3>
+<div class="two">
+<div class="field"><label>Paid Spend Required for HP (₱)</label><input id="hpSpend" type="number" value="500" min="1" oninput="calculateLoyalty()"></div>
+<div class="field"><label>House Points Earned</label><input id="hpPoints" type="number" value="5" min="0" step=".01" oninput="calculateLoyalty()"></div>
+</div>
+<div class="help">Example: ₱500 paid spend = 5 House Points. The system floors partial blocks.</div>
+
+<h3>2. PCQP Formula</h3>
+<div class="info">PCQP is based directly on Gross Profit, not on a separate spend block.</div>
+<div class="two">
+<div class="field"><label>Conservative GP Rate (%)</label><input id="pcqpGpRate" type="number" value="12.96" readonly></div>
+<div class="field"><label>PCQP Rate (% of GP)</label><input id="pcqpRate" type="number" value="10" readonly></div>
+</div>
+<div class="help"><b>PCQP = FLOOR(Conservative GP × 10%)</b>. Conservative GP = Paid Sales × 12.96%.</div>
+
+<h3>3. Sample Customer Spend</h3>
+<div class="two">
+<div class="field"><label>Enter Spend As</label>
+<select id="sampleBasis" onchange="calculateLoyalty()">
+<option value="day">Daily Sales</option>
+<option value="week" selected>Weekly Sales</option>
+<option value="month">Monthly Sales</option>
+<option value="year">Annual Sales</option>
+</select></div>
+<div class="field"><label>Customer Paid Spend (₱)</label><input id="sampleSpend" type="number" value="500" min="0" oninput="calculateLoyalty()"></div>
+</div>
+<div class="loyalty-flow">
+<div class="flow-box"><div class="flow-title">Daily</div><div class="flow-value" id="loyDailySales">₱0</div></div>
+<div class="flow-box"><div class="flow-title">Weekly</div><div class="flow-value" id="loyWeeklySales">₱0</div></div>
+<div class="flow-box"><div class="flow-title">Monthly</div><div class="flow-value" id="loyMonthlySales">₱0</div></div>
+<div class="flow-box"><div class="flow-title">Annualized</div><div class="flow-value" id="loyAnnualSales">₱0</div></div>
+</div>
+<div class="help">Annualized planning uses 52 weeks / 12 months. Renewal uses the annualized amount, so changing the sample cadence automatically changes the renewal result.</div>
+
+<h3>4. Target Sales → HP + PCQP</h3>
+<div class="field"><label>Target Sales Source</label><select id="targetSource" onchange="syncTargetFromSource()">
+<option value="boss">Boss Proposal — 100% scenario</option>
+<option value="marketing">Marketing Proposal — 100% scenario</option>
+<option value="custom">Custom / Edited Target</option>
+</select></div>
+<div class="two">
+  <div class="field"><label>Target Sales (₱)</label><input id="targetSalesInput" type="number" value="10000" min="0" oninput="editTargetSales()"></div>
+  <div class="field" style="display:flex;align-items:end"><button class="btn secondary" type="button" onclick="syncTargetFromSource()">↻ Sync to Selected Source</button></div>
+</div>
+<div class="help">Target Sales is the single driver. When it changes, the target Conservative GP, House Points and PCQP update immediately. Use “Sync” to pull the latest required sales from Boss or Marketing.</div>
+
+<h3>Renewal Package Basis</h3>
+<div class="field"><label>Base Privilege Package Used for Renewal</label><select id="renewalPackageBasis" onchange="calculateLoyalty()"><option value="boss">Boss Proposal</option><option value="marketing">Marketing Proposal</option></select></div>
+<div class="help">This selection determines which first-year Base Privilege Cost is carried into the renewal calculation. It is independent of the Target Sales Source.</div>
+
+<h3>5. Renewal Rules — Paid Renewal</h3>
+<div class="info"><b>Renewal is not free.</b> Every member may renew by paying the renewal fee. The annual sales / HP / PCQP requirements determine whether they qualify for a renewal discount. If the requirements are not met, the member can still renew but pays the full renewal fee. Higher PCQP = higher accumulated conservative GP / paid spending = higher potential renewal discount.</div>
+<div class="two">
+<div class="field"><label>Base Renewal Fee (₱)</label><input id="renewFee" type="number" value="5999" min="0" oninput="calculateLoyalty()"></div>
+<div class="field"><label>Minimum Annual Paid Sales (₱)</label><input id="renewSales" type="number" value="15000" min="0" oninput="calculateLoyalty()"></div>
+</div>
+<div class="info"><b>Automatic renewal thresholds.</b> Minimum House Points and Minimum PCQP are not manually entered. They are automatically calculated from the Minimum Annual Paid Sales using the current House Points and PCQP formulas. The minimum annual sales is the only spending threshold you edit.</div>
+<div class="loyalty-flow" style="margin-top:12px">
+<div class="flow-box"><div class="flow-title">Auto Minimum HP</div><div class="flow-value" id="renewHPDisplay">0</div></div>
+<div class="flow-box"><div class="flow-title">Auto Minimum PCQP</div><div class="flow-value" id="renewPCQPDisplay">0</div></div>
+</div>
+
+<h3>Renewal Discount Tiers</h3>
+<div class="help">Only the PCQP threshold and discount percentage are editable. The system automatically selects the highest tier reached by the customer's annualized PCQP. The renewal fee can never become negative. A member may always renew by paying the base fee; the tier only determines the discount.</div>
+<div id="renewalTiers"></div>
+<button class="btn secondary" onclick="addRenewalTier()">+ Add Discount Tier</button>
+
+<div class="info" style="margin-top:14px">
+  <b>Renewal economics:</b> the renewal uses the <b>same base privilege package</b> as the selected first-year proposal.
+  The system carries that same Base Privilege Cost into Year 2, compares it with the Base Renewal Fee, and shows the
+  renewal gap/surplus. The member can always renew by paying the fee. The <b>Minimum Annual Paid Sales</b> is the
+  discount gateway, while <b>PCQP determines the discount tier</b>.
+</div>
+
+<div class="loyalty-flow" style="margin-top:12px">
+  <div class="flow-box">
+    <div class="flow-title">Same Base Privilege Cost</div>
+    <div class="flow-value" id="renewBasePrivilegeCost">₱0</div>
+  </div>
+  <div class="flow-box">
+    <div class="flow-title">Renewal Fee at 0% Discount</div>
+    <div class="flow-value" id="renewFeeCoverage">₱0</div>
+  </div>
+  <div class="flow-box">
+    <div class="flow-title">Renewal Gap / Surplus</div>
+    <div class="flow-value" id="renewalGapEconomics">₱0</div>
+  </div>
+  <div class="flow-box">
+    <div class="flow-title">Sales Needed to Cover Gap</div>
+    <div class="flow-value" id="renewalSalesNeededEconomics">₱0</div>
+  </div>
+</div>
+
+<div class="preview" style="margin-top:12px">
+  <div class="bigline">
+    <span>Maximum Discount Without Dropping Below Base Privilege Cost</span>
+    <strong id="maxSafeRenewalDiscount">0%</strong>
+  </div>
+  <div class="bigline">
+    <span>Discounted Renewal Fee at Highest Earned Tier</span>
+    <strong id="renewalDiscountedFeeEconomics">₱0.00</strong>
+  </div>
+  <div class="bigline">
+    <span>Coverage After Discount</span>
+    <strong id="renewalCoverageAfterDiscount">₱0.00</strong>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div>
+<div class="card"><h2>Live Loyalty Results</h2><div class="results-grid">
+<div class="metric"><div class="label">Sample Annualized Sales</div><div class="value" id="loySampleSpend">₱0</div><div class="sub">used for renewal</div></div>
+<div class="metric"><div class="label">Sample House Points</div><div class="value blue" id="loySampleHP">0</div><div class="sub">from annualized paid sales</div></div>
+<div class="metric"><div class="label">Sample Conservative GP</div><div class="value" id="loySampleGP">₱0</div><div class="sub">annualized sales × 12.96%</div></div>
+<div class="metric"><div class="label">Sample PCQP</div><div class="value blue" id="loySamplePCQP">0</div><div class="sub">from conservative GP</div></div>
+<div class="metric"><div class="label">Target Sales</div><div class="value" id="loyTargetSales">₱0</div><div class="sub">single driver for target HP + PCQP</div></div>
+<div class="metric"><div class="label">Conservative GP at Target</div><div class="value" id="loyTargetGP">₱0</div><div class="sub">target sales × 12.96%</div></div>
+<div class="metric"><div class="label">Accumulated HP at Target</div><div class="value blue" id="loyTargetHP">0</div><div class="sub">if all target sales are paid spend</div></div>
+<div class="metric"><div class="label">Accumulated PCQP at Target</div><div class="value blue" id="loyTargetPCQP">0</div><div class="sub">if all target sales are paid spend</div></div>
+</div>
+<div class="formula"><b>House Points</b> = FLOOR(Paid Sales ÷ HP Spend Threshold) × HP Rate.<br><b>Conservative GP</b> = Paid Sales × 12.96%.<br><b>PCQP</b> = FLOOR(Conservative GP × 10%).</div></div>
+
+<div class="card"><h2>Renewal & Discount Check</h2>
+<div class="renewal">
+<div class="renew-card"><h4>Annual Sales</h4><p id="renewSalesResult">—</p></div>
+<div class="renew-card"><h4>House Points</h4><p id="renewHPResult">—</p><small>automatic from minimum annual sales</small></div>
+<div class="renew-card"><h4>PCQP</h4><p id="renewPCQPResult">—</p><small>automatic from minimum annual sales</small></div>
+</div>
+<div class="preview" style="margin-top:12px">
+<div class="bigline"><span>Renewal Status</span><strong id="renewStatus">—</strong></div>
+<div class="bigline"><span>Renewal Discount</span><strong id="renewDiscount">—</strong></div>
+<div class="bigline"><span>Base Renewal Fee</span><span id="renewBaseFee">—</span></div>
+<div class="bigline"><span>Discount Amount</span><span id="renewDiscountAmount">—</span></div>
+<div class="bigline"><span>Final Renewal Fee</span><strong id="renewFinalFee">—</strong></div>
+<div class="bigline"><span>Reason</span><span id="renewReason">—</span></div>
+</div>
+</div>
+
+<div class="card"><h2>Minimum Annual Sales → Automatic HP + PCQP</h2>
+<div class="info">The minimum annual sales requirement is now connected to both reward systems. Change the minimum annual sales and the required HP/PCQP update automatically.</div>
+<div class="loyalty-flow">
+<div class="flow-box"><div class="flow-title">Minimum Annual Sales</div><div class="flow-value" id="renewMinSalesAuto">₱0</div></div>
+<div class="flow-box"><div class="flow-title">Conservative GP</div><div class="flow-value" id="renewMinGPAuto">₱0</div></div>
+<div class="flow-box"><div class="flow-title">HP Generated</div><div class="flow-value" id="renewMinHPAuto">0</div></div>
+<div class="flow-box"><div class="flow-title">PCQP Generated</div><div class="flow-value" id="renewMinPCQPAuto">0</div></div>
+</div>
+</div>
+
+<div class="card"><h2>Example: Target Sales → Loyalty Accumulation</h2>
+<div class="table-wrap"><table><thead><tr><th>Sales Level</th><th>Paid Sales</th><th>Conservative GP</th><th>House Points</th><th>PCQP</th></tr></thead><tbody id="loyaltyTargetTable"></tbody></table></div>
+</div>
+</div></div></div>
+
+<!-- COMPARISON -->
+<div id="comparison" class="program">
+<div class="card"><h2>Boss vs Marketing</h2><div class="info">This comparison uses the live inputs from both proposals. Change any input and the comparison updates.</div>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Boss</th><th>Marketing</th></tr></thead><tbody>
+<tr><td>Membership Price</td><td id="cMembershipBoss"></td><td id="cMembershipMarketing"></td></tr>
+<tr><td>Duration</td><td id="cDurationBoss"></td><td id="cDurationMarketing"></td></tr>
+<tr><td>Maximum Meal Redemptions</td><td id="cMealsBoss"></td><td id="cMealsMarketing"></td></tr>
+<tr><td>Customer Value</td><td id="cValueBoss"></td><td id="cValueMarketing"></td></tr>
+<tr><td>Maximum Company Cost</td><td id="cCostBoss"></td><td id="cCostMarketing"></td></tr>
+<tr><td>Maximum Gap</td><td id="cGapBoss"></td><td id="cGapMarketing"></td></tr>
+<tr><td>Required Additional Sales</td><td id="cSalesBoss"></td><td id="cSalesMarketing"></td></tr>
+<tr><td>Customer Value / Price</td><td id="cRatioBoss"></td><td id="cRatioMarketing"></td></tr>
+</tbody></table></div></div>
+<div class="card"><h2>Quick Interpretation</h2><div class="results-grid">
+<div class="metric"><div class="label">Higher Customer Value</div><div class="value" id="higherValue">—</div></div>
+<div class="metric"><div class="label">Lower Maximum Cost</div><div class="value" id="lowerCost">—</div></div>
+<div class="metric"><div class="label">Lower Required Sales</div><div class="value" id="lowerSales">—</div></div>
+</div></div>
+</div>
+</div>
+
+
+
+<div class="formula-reference" style="margin-top:18px;padding:16px;border:1px solid #dfe4ea;border-radius:14px;background:#fff">
+<h3 style="margin:0 0 10px">Core Calculation Rules</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;font-size:13px">
+<div><b>Sales</b><br>Actual Transaction Selling Price</div>
+<div><b>Product Cost</b><br>Actual Cost of Products Sold</div>
+<div><b>GP</b><br>Sales − Product Cost</div>
+<div><b>GP Margin</b><br>GP ÷ Sales × 100</div>
+<div><b>Maximum Planning Cost</b><br>Sales × 87.04%</div>
+<div><b>Conservative GP</b><br>Sales × 12.96%</div>
+<div><b>PCQP</b><br>FLOOR(GP × 10%)</div>
+<div><b>Membership Contribution</b><br>Membership Fee − Base Privilege Cost</div>
+<div><b>1st-Year Direct Contribution</b><br>Membership Fee + Food GP − Base Privilege Cost</div>
+</div></div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
