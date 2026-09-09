@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harrison Rewards Powerhouse Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">HARRISON HOUSE OF INASAL & BBQ</div>
+      <h1>Rewards Membership Powerhouse Simulator</h1>
+      <p>Virtual foundation → VIP Standard → VIP Premium → Sales Economics → PCQP → Renewal</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn secondary" id="resetBtn">Reset</button>
+      <button class="btn primary" id="exportBtn">Export Scenario JSON</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-grid">
+      <div class="hero-card">
+        <span class="tag">MASTER LOGIC</span>
+        <h2>Base Inclusion First</h2>
+        <p>Renewal and target economics begin with the actual benefit package. Member spending is normalized for different registration months, then converted to Conservative GP and PCQP.</p>
+        <div class="flow">
+          <span>Base Inclusion</span><b>→</b><span>Cost</span><b>→</b><span>Gap</span><b>→</b><span>Protected Sales</span><b>→</b><span>Actual Spend</span><b>→</b><span>GP / PCQP</span><b>→</b><span>Renewal</span>
+        </div>
+      </div>
+      <div class="hero-card compact">
+        <div class="mini-kpi"><span>Conservative GP</span><strong id="gpRateLabel">12.96%</strong></div>
+        <div class="mini-kpi"><span>Profit Buffer</span><strong id="bufferLabel">20%</strong></div>
+        <div class="mini-kpi"><span>Standard ATV</span><strong>₱900</strong></div>
+        <div class="mini-kpi"><span>Premium ATV</span><strong>₱1,100</strong></div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Simulator sections">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="target">Target Sales</button>
+      <button class="tab" data-tab="renewal">Renewal</button>
+      <button class="tab" data-tab="member">Member Calculator</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="section-head">
+        <div><span class="tag">PROGRAM SETUP</span><h2>Virtual + VIP Membership Architecture</h2></div>
+      </div>
+      <div class="tier-grid">
+        <article class="tier-card virtual">
+          <div class="tier-top"><span class="tier-name">Virtual</span><span class="pill">PERMANENT</span></div>
+          <div class="price">₱0</div>
+          <div class="muted">Permanent Member ID</div>
+          <div class="divider"></div>
+          <ul><li>Activated by ₱899+ qualifying Harrison Direct food purchase</li><li>Customer profile + purchase history</li><li>HP stored in Harrison Rewards</li><li>PCQP surfaced from the separate PCQP system</li><li>Upgrade without creating a new account</li></ul>
+        </article>
+        <article class="tier-card standard">
+          <div class="tier-top"><span class="tier-name">VIP Standard</span><span class="pill blue">6 MONTHS</span></div>
+          <div class="price">₱2,999</div><div class="muted">VAT-inclusive</div>
+          <div class="divider"></div>
+          <ul><li>1 free ₱199-value Combo per week</li><li>Maximum 26 regular redemptions per term</li><li>Physical VIP card for in-store use</li><li>Birthday benefit only when approved as an inclusion</li><li>Same permanent Member ID</li></ul>
+        </article>
+        <article class="tier-card premium">
+          <div class="tier-top"><span class="tier-name">VIP Premium</span><span class="pill gold">12 MONTHS</span></div>
+          <div class="price">₱5,999</div><div class="muted">VAT-inclusive</div>
+          <div class="divider"></div>
+          <ul><li>2 free eligible Combo Meals every weekend</li><li>Maximum 104 regular redemptions per year</li><li>1 free eligible Combo birthday meal</li><li>Physical VIP card for in-store use</li><li>Same permanent Member ID</li></ul>
+        </article>
+      </div>
+      <div class="note"><strong>System rule:</strong> One customer = one permanent Member ID. Membership status changes, but the customer account does not.</div>
+    </section>
+
+    <section id="target" class="tab-panel">
+      <div class="section-head">
+        <div><span class="tag">TARGET ENGINE</span><h2>Membership Sales Target Simulator</h2></div>
+        <div class="toolbar"><label>Tier <select id="targetTier"><option value="standard">VIP Standard</option><option value="premium">VIP Premium</option></select></label></div>
+      </div>
+      <div class="controls-card">
+        <div class="field"><label>Membership fee, VAT inclusive</label><input id="targetFee" type="number" step="1" /></div>
+        <div class="field"><label>Duration, months</label><input id="targetDuration" type="number" step="1" /></div>
+        <div class="field"><label>Program cost scenario</label><select id="targetScenario"><option value="100">100% Maximum</option><option value="75">75% High</option><option value="50">50% Moderate</option><option value="25">25% Low</option></select></div>
+        <div class="field"><label>Base inclusion meals in full term</label><input id="targetMeals" type="number" step="1" /></div>
+        <div class="field"><label>Meal production cost</label><input id="targetMealCost" type="number" step="0.01" value="186.52" /></div>
+        <div class="field"><label>Fixed program cost</label><input id="targetFixed" type="number" step="0.01" /></div>
+        <div class="field"><label>Birthday meals included</label><input id="targetBirthdayMeals" type="number" step="1" /></div>
+        <div class="field"><label>Conservative GP %</label><input id="targetGpRate" type="number" step="0.01" value="12.96" /></div>
+        <div class="field"><label>Profit buffer %</label><input id="targetBuffer" type="number" step="1" value="20" /></div>
+        <div class="field"><label>Paid transactions / week</label><input id="targetTxWeek" type="number" step="1" /></div>
+        <div class="field"><label>Target ATV</label><input id="targetAtv" type="number" step="1" /></div>
+        <div class="field"><label>Checkpoint months</label><input id="targetCheckpoint" type="number" step="1" /></div>
+      </div>
+      <div class="results-grid" id="targetResults"></div>
+      <div class="formula-card">
+        <h3>Formula chain</h3>
+        <pre id="formulaOutput"></pre>
+      </div>
+    </section>
+
+    <section id="renewal" class="tab-panel">
+      <div class="section-head">
+        <div><span class="tag">RENEWAL ENGINE</span><h2>Program-Level Renewal Fee + Member-Level Discount</h2></div>
+      </div>
+      <div class="renew-grid">
+        <div class="controls-card">
+          <h3>Population economics</h3>
+          <div class="field"><label>Tier</label><select id="renewTier"><option value="standard">VIP Standard</option><option value="premium">VIP Premium</option></select></div>
+          <div class="field"><label>Total qualified paid sales</label><input id="renewSales" type="number" value="0" /></div>
+          <div class="field"><label>Total active member-months</label><input id="renewMemberMonths" type="number" value="1" /></div>
+          <div class="field"><label>Actual benefit production cost</label><input id="renewBenefitCost" type="number" value="0" /></div>
+          <div class="field"><label>Eligible member-terms</label><input id="renewTerms" type="number" value="1" /></div>
+          <div class="field"><label>Recovery rate %</label><input id="renewRecovery" type="number" value="80" /></div>
+          <div class="field"><label>Minimum renewal fee</label><input id="renewMinFee" type="number" value="0" /></div>
+        </div>
+        <div class="controls-card">
+          <h3>Performance bands</h3>
+          <div class="band-row"><input id="b1" type="number" value="0" /><label>Low / floor</label><input id="d1" type="number" value="0" /><span>% discount</span></div>
+          <div class="band-row"><input id="b2" type="number" value="100" /><label>Developing</label><input id="d2" type="number" value="5" /><span>% discount</span></div>
+          <div class="band-row"><input id="b3" type="number" value="200" /><label>Active</label><input id="d3" type="number" value="10" /><span>% discount</span></div>
+          <div class="band-row"><input id="b4" type="number" value="300" /><label>Strong</label><input id="d4" type="number" value="15" /><span>% discount</span></div>
+          <div class="band-row"><input id="b5" type="number" value="500" /><label>Top</label><input id="d5" type="number" value="20" /><span>% discount</span></div>
+          <div class="hint">Thresholds are configurable. PCQP remains sourced from the external PCQP system.</div>
+        </div>
+      </div>
+      <div class="results-grid" id="renewResults"></div>
+      <div class="formula-card"><h3>Renewal formula</h3><pre id="renewFormulaOutput"></pre></div>
+    </section>
+
+    <section id="member" class="tab-panel">
+      <div class="section-head"><div><span class="tag">INDIVIDUAL MEMBER</span><h2>Member Performance Calculator</h2></div></div>
+      <div class="controls-card member-controls">
+        <div class="field"><label>Tier</label><select id="memberTier"><option value="standard">VIP Standard</option><option value="premium">VIP Premium</option></select></div>
+        <div class="field"><label>Qualified paid sales</label><input id="memberSales" type="number" value="30000" /></div>
+        <div class="field"><label>Active months</label><input id="memberMonths" type="number" value="6" /></div>
+        <div class="field"><label>PCQP from external system (optional)</label><input id="memberPcqp" type="number" value="388" /></div>
+      </div>
+      <div class="results-grid" id="memberResults"></div>
+      <div class="note"><strong>Interpretation:</strong> Member spending is normalized by active months so members who registered in different months can be compared fairly. The PCQP value shown here can be the value returned by the separate PCQP system.</div>
+    </section>
+  </main>
+  <footer class="footer">Harrison Rewards Membership Powerhouse Simulator • Financial assumptions are configurable management parameters.</footer>
+  <script src="app.js"></script>
+</body>
+</html>
